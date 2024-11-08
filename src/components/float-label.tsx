@@ -2,47 +2,55 @@ import { cn } from "@/lib";
 import React, { useEffect, useState } from "react";
 
 interface FloatLabelInterface {
-  children: React.ReactElement;
   label: string;
+  children: React.ReactElement;
   for?: string;
+  value?: string | number | undefined;
   className?: string;
+  obligatory?: boolean;
 }
 
 const FloatLabel: React.FC<FloatLabelInterface> = (props) => {
   const [isFocused, setIsFocused] = useState(false);
-  const [hasValue, setHasValue] = useState(false);
-
-  // Verifica si el `input` tiene algún valor
+  const [inputValue, setInputValue] = useState<string | number | undefined>(
+    props.value ?? props.children.props.value
+  );
   useEffect(() => {
-    const inputElement = document.getElementById(
-      props.for || ""
-    ) as HTMLInputElement;
-    if (inputElement) {
-      setHasValue(!!inputElement.value);
-    }
-  }, [props.for]);
+    const newValue = props.value ?? props.children.props.value;
+    setInputValue(newValue);
+  }, [props.value, props.children.props.value]);
 
   const handleFocus = () => setIsFocused(true);
-  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-    setIsFocused(false);
-    setHasValue(!!e.target.value);
+  const handleBlur = () => {
+    if (!inputValue || inputValue.toString().trim() === "") {
+      setIsFocused(false);
+    }
+  };
+
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setInputValue(event.target.value);
+  };
+
+  const isFloating =
+    isFocused || (inputValue && inputValue.toString().length !== 0);
+
+  const labelClass = isFloating ? "label label-float" : "label";
+
+  const childProps = {
+    onFocus: handleFocus,
+    onBlur: handleBlur,
+    value: inputValue,
+    onChange: handleChange,
   };
   return (
-    <div className={cn("relative w-full h-full", props.className)}>
+    <div className={cn("float-label", props.className)}>
       {React.cloneElement(props.children, {
-        className: `w-full border border-gray-300 rounded-md px-3 py-2 
-                    focus:outline-none focus:border-blue-500 transition-all`,
-        onFocus: handleFocus,
-        onBlur: handleBlur,
+        ...childProps,
+        ...props.children.props,
       })}
-      <label
-        htmlFor={props.for}
-        className={cn("absolute left-3 transition-all duration-200", {
-          "bottom-1.5 text-gray-500": !isFocused && !hasValue,
-          "bottom-10 text-sm text-blue-500": isFocused || hasValue,
-        })}
-      >
-        {props.label}
+      <label htmlFor={props.for} className={labelClass}>
+        {props.label}{" "}
+        {props.obligatory && <span className="text-red-500">*</span>}
       </label>
     </div>
   );

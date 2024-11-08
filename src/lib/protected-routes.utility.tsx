@@ -1,8 +1,9 @@
+import { useAuthStore } from "@/store";
 import { Navigate, Outlet } from "react-router-dom";
 
 const ProtectedRoutes: React.FC = () => {
-  const user = null;
-  return user ? <Outlet /> : <Navigate to={"/login"} />;
+  const { authUser } = useAuthStore();
+  return authUser ? <Outlet /> : <Navigate to={"/login"} />;
 };
 
-export default ProtectedRoutes
+export default ProtectedRoutes;

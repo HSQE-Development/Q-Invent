@@ -1,21 +1,47 @@
-import { BrowserRouter, Route, Routes } from "react-router-dom";
-import { Login } from "./pages";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { ProtectedRoutes } from "./lib";
+import { Home, Login } from "./pages";
+import { ThemeProvider } from "./components";
+import { Toaster } from "@/components/ui/sonner";
+import Layout from "./components/layout/Layout";
 function App() {
+  const router = createBrowserRouter(
+    [
+      {
+        path: "/login",
+        element: <Login />,
+      },
+      {
+        element: <ProtectedRoutes />,
+        children: [
+          {
+            path: "/",
+            element: <Layout />,
+            children: [
+              {
+                path: "",
+                element: <Home />,
+              },
+            ],
+          },
+        ],
+      },
+    ],
+    {
+      future: {
+        v7_relativeSplatPath: true,
+        v7_partialHydration: true,
+        v7_fetcherPersist: true,
+        v7_normalizeFormMethod: true,
+        v7_skipActionErrorRevalidation: true,
+      },
+    }
+  );
   return (
-    <BrowserRouter
-      future={{
-        v7_startTransition: true,
-      }}
-    >
-      <Routes>
-        <Route element={<Login />} path="/login" />
-
-        <Route element={<ProtectedRoutes />}>
-          <Route path="/" element={<Login />} />
-        </Route>
-      </Routes>
-    </BrowserRouter>
+    <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
+      <RouterProvider router={router} future={{ v7_startTransition: true }} />
+      <Toaster expand={false} richColors position="top-center" />
+    </ThemeProvider>
   );
 }
 
