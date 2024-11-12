@@ -4,13 +4,19 @@ import LOGO_COLOR from "/LOGO_COLOR.png";
 
 export interface LoginInterface {}
 
-export const AnimatedBackground: React.FC<{ position: "top" | "bottom" }> = ({
-  position,
-}) => {
+export const AnimatedBackground: React.FC<{
+  position: "top" | "bottom" | "left";
+}> = ({ position }) => {
   const gradientColors =
     position === "top" ? "from-violet-800/80" : "from-violet-800/50";
-  const height = position === "top" ? "h-8 top-0" : "h-8";
-  const width = position === "top" ? "w-[25%]" : "w-[55%]";
+  const height =
+    position === "top"
+      ? "h-8 top-0"
+      : position === "bottom"
+      ? "h-8"
+      : "w-20 h-20 left-0";
+  const width =
+    position === "top" ? "w-[25%]" : position === "bottom" ? "w-[55%]" : "";
 
   return (
     <motion.div

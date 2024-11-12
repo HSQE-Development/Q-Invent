@@ -9,7 +9,7 @@ export default function Layout() {
         <AnimatedBackground position="top" />
 
         <Navbar />
-        <main className="flex-1 w-full">
+        <main className="w-full h-full px-4 overflow-hidden">
           <Outlet />
         </main>
       </div>
