@@ -4,8 +4,25 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { ListProducts, SearchProduct } from "./Components";
 import { AnimatedBackground } from "../Login/Login";
+import { useProductStore } from "@/store/productStore";
+import { useEffect } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 export default function ProductPage() {
+  const productStore = useProductStore();
+
+  useEffect(() => {
+    productStore.getAllProducts();
+  }, []);
   return (
     <section className="w-full h-full flex flex-col items-center overflow-hidden">
       <div className="w-full h-full grid grid-cols-12 gap-4">
@@ -31,7 +48,40 @@ export default function ProductPage() {
               <Button>Agregar Producto</Button>
             </div>
           </div>
-          <ListProducts />
+          {productStore.loading &&
+            Array.from({ length: 4 }).map((_, index) => (
+              <div className="h-20 rounded-2xl my-2 border flex flex-col items-start justify-center p-4 gap-4">
+                <Skeleton className="h-4 w-16 " key={index} />
+                <Skeleton className="h-4 w-48 " key={index} />
+              </div>
+            ))}
+          {!productStore.loading && (
+            <ListProducts products={productStore.products} />
+          )}
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious href="#" />
+              </PaginationItem>
+              <PaginationItem>
+                <PaginationLink href="#">1</PaginationLink>
+              </PaginationItem>
+              <PaginationItem>
+                <PaginationLink href="#" isActive>
+                  2
+                </PaginationLink>
+              </PaginationItem>
+              <PaginationItem>
+                <PaginationLink href="#">3</PaginationLink>
+              </PaginationItem>
+              <PaginationItem>
+                <PaginationEllipsis />
+              </PaginationItem>
+              <PaginationItem>
+                <PaginationNext href="#" />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
         </div>
       </div>
     </section>
