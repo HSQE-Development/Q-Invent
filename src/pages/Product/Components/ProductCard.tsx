@@ -26,7 +26,7 @@ export default function ProductCard({ product }: ProductCardProps) {
             <BulletSeparator />
             <span className="flex items-center gap-1">
               <Info className="w-4 h-4" />
-              <p>{product.observation}</p>
+              <p>{product.observation ?? "Sin Observación"}</p>
             </span>
             {/* <BulletSeparator />
             <p>Cantidad Total</p>
@@ -42,6 +42,7 @@ export default function ProductCard({ product }: ProductCardProps) {
             <div
               className={cn(
                 "w-2 h-2 rounded-full",
+                quantityNumber == 0 && "bg-red-500",
                 quantityNumber <= 2 && "bg-red-500",
                 quantityNumber <= 6 && quantityNumber > 2 && "bg-orange-500",
                 quantityNumber > 6 && "bg-green-500"

@@ -5,6 +5,7 @@ import {
   ApiSuccesResponse,
   Pagination,
   Product,
+  ProductRequest,
   ProductResponse,
 } from "@/models";
 import { toast } from "sonner";
@@ -26,11 +27,13 @@ export const DEFAULT_PAGINATION: Pagination<[]> = {
   previous_page_url: null,
 };
 
-type Action = {
+type Actions = {
   getAllProducts: () => Promise<void>;
+  createProduct: (data: ProductRequest) => Promise<void>;
+  countOfProducts: () => number;
 };
 
-export const useProductStore = create<AuthState & Action>()((set) => ({
+export const useProductStore = create<AuthState & Actions>()((set, get) => ({
   products: DEFAULT_PAGINATION,
   loading: false,
   getAllProducts: async () => {
@@ -64,5 +67,35 @@ export const useProductStore = create<AuthState & Action>()((set) => ({
       });
       toast.error(err.message);
     }
+  },
+  createProduct: async (data) => {
+    set({ loading: true });
+    try {
+      const {
+        data: { data: productResponse },
+      } = await apiClient.post<ApiSuccesResponse<{ product: ProductResponse }>>(
+        "/products",
+        data
+      );
+
+      const adaptedProduct = createAdaptedProduct(productResponse.product);
+
+      get().products.data.push(adaptedProduct);
+      set({
+        loading: false,
+      });
+      toast.success("Registro correcto.", {
+        description: "Registraste un nuevo producto ;D",
+      });
+    } catch (error) {
+      const err = error as ApiErrorResponse;
+      set({
+        loading: false,
+      });
+      toast.error(err.message);
+    }
+  },
+  countOfProducts: () => {
+    return get().products.data.length || 0;
   },
 }));
