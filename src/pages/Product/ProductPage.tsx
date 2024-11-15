@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { ListProducts, SearchProduct } from "./Components";
 import { AnimatedBackground } from "../Login/Login";
 import { useProductStore } from "@/store/productStore";
-import { lazy, Suspense, useEffect, useMemo } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Pagination,
@@ -17,6 +17,8 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { useModal } from "@/hooks";
+import ProductStatusFilter from "./Components/Filters/ProductStatusFilter";
+import { useCountContext } from "@/context/CountContext";
 
 const ProductForm = lazy(() => import("./Components/ProductForm"));
 
@@ -29,21 +31,23 @@ export default function ProductPage() {
 
   const { open, close, isOpen } = useModal();
 
-  const totalProducts = useMemo(() => {
-    return productStore.countOfProducts();
-  }, [productStore.products]);
+  const { allCount } = useCountContext();
 
   return (
     <section className="w-full h-full flex flex-col items-center overflow-hidden">
       <div className="w-full h-full grid grid-cols-12 gap-4">
-        <div className="col-span-3 flex flex-col bg_patterns relative">
+        <div className="col-span-3 flex flex-col relative h-auto bg_patterns overflow-auto scrolling__container ">
           <AnimatedBackground position="left" />
 
-          <div className="flex items-baseline justify-between pl-2">
+          <div className="flex items-baseline justify-between pl-2 sticky top-0">
             <h1 className="text-3xl font-extrabold">Productos</h1>
             <Badge className="flex items-center gap-2 bg-white text-black border-2 border-black hover:bg-white">
-              {totalProducts} <small>productos</small>
+              {allCount} <small>productos</small>
             </Badge>
+          </div>
+          <div className="my-8 flex flex-col gap-8 px-4">
+            <ProductStatusFilter />
+            <ProductStatusFilter />
           </div>
         </div>
         <Modal
@@ -107,7 +111,7 @@ export default function ProductPage() {
               )}
               <PaginationItem>
                 <PaginationNext
-                  href="#"
+                  href={productStore.products.next_page_url || ""}
                   // ={!productStore.products.next_page_url}
                 />
               </PaginationItem>

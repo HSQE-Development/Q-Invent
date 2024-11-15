@@ -1,28 +1,74 @@
-import { Button, Input } from "@/components";
+import { Button, FormSkeleton, Input } from "@/components";
 import FloatLabel from "@/components/float-label";
 import { cn } from "@/lib";
 import { Textarea } from "@/components/ui/textarea";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { ProductRequest } from "@/models";
 import { useProductStore } from "@/store/productStore";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 interface ProductFormProps {
   id?: number;
   className?: string;
 }
-function ProductForm({ className }: ProductFormProps) {
+function ProductForm({ className, id }: ProductFormProps) {
+  const [loadData, setLoadData] = useState(false);
   const {
     register,
     handleSubmit,
+    reset,
+    setValue,
     formState: { errors },
   } = useForm<ProductRequest>();
+
   const productStore = useProductStore();
-  const onSubmit: SubmitHandler<ProductRequest> = (data) =>
-    handleCreateProduct(data);
+  const onSubmit: SubmitHandler<ProductRequest> = (data) => {
+    if (!id) {
+      handleCreateProduct(data);
+    } else {
+      handleUpdateProduct(data);
+    }
+  };
+
+  const handleUpdateProduct = async (data: Partial<ProductRequest>) => {
+    try {
+      if (id) {
+        await productStore.updateProduct(id, data);
+        toast.success("Actualizado correctamente");
+      }
+    } catch (error: any) {
+      toast.error(error.message);
+    }
+  };
 
   const handleCreateProduct = async (data: ProductRequest) => {
     await productStore.createProduct(data);
   };
+
+  useEffect(() => {
+    async function loadProductData(productId: number) {
+      setLoadData(true);
+      const product = await productStore.getProductById(productId);
+      setLoadData(false);
+
+      if (product) {
+        setValue("name", product.name);
+        setValue("total_quantity", product.totalQuantity.toString());
+        setValue("ubication", product.ubication);
+        setValue("observation", product.observation);
+        setValue("active", "A");
+      }
+    }
+
+    if (id) {
+      loadProductData(id);
+    }
+  }, [id, reset]);
+
+  if (loadData) {
+    return <FormSkeleton />;
+  }
 
   return (
     <form

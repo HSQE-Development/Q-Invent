@@ -13,7 +13,9 @@ import { create } from "zustand";
 
 type AuthState = {
   products: Pagination<Product[]>;
+  product: Product | null;
   loading: boolean;
+  filters?: Record<string, any>;
 };
 
 export const DEFAULT_PAGINATION: Pagination<[]> = {
@@ -30,19 +32,29 @@ export const DEFAULT_PAGINATION: Pagination<[]> = {
 type Actions = {
   getAllProducts: () => Promise<void>;
   createProduct: (data: ProductRequest) => Promise<void>;
-  countOfProducts: () => number;
+  countOfProducts: (state?: string) => number;
+  getProductById: (id: number) => Promise<Product | null>;
+  updateProduct: (id: number, data: Partial<ProductRequest>) => Promise<void>;
 };
 
 export const useProductStore = create<AuthState & Actions>()((set, get) => ({
   products: DEFAULT_PAGINATION,
   loading: false,
+  product: null,
+  filters: {},
   getAllProducts: async () => {
     set({ loading: true });
 
     try {
+      const filters = get().filters;
+      const queryString = filters
+        ? "?" +
+          new URLSearchParams(filters as Record<string, string>).toString()
+        : "";
+
       const response = await apiClient.get<
         ApiSuccesResponse<{ products: Pagination<ProductResponse[]> }>
-      >("/products");
+      >(`/products${queryString}`);
 
       const responseAdapted: Pagination<Product[]> = {
         total: response.data.data.products.total,
@@ -92,10 +104,60 @@ export const useProductStore = create<AuthState & Actions>()((set, get) => ({
       set({
         loading: false,
       });
-      toast.error(err.message);
+      throw new Error(err.message);
     }
   },
-  countOfProducts: () => {
-    return get().products.data.length || 0;
+  countOfProducts: (state) => {
+    let count = 0;
+    count = get().products.data.length || 0;
+    if (state) {
+      count =
+        get().products.data.filter((product) => product.active === state)
+          .length || 0;
+    }
+    return count;
+  },
+  getProductById: async (id) => {
+    try {
+      const response = await apiClient.get<
+        ApiSuccesResponse<{ product: ProductResponse }>
+      >(`/products/${id}`);
+      const adaptedProduct = createAdaptedProduct(response.data.data.product);
+      return adaptedProduct;
+    } catch (error) {
+      const err = error as ApiErrorResponse;
+      set({
+        loading: false,
+      });
+      throw new Error(err.message);
+    }
+    return null;
+  },
+  updateProduct: async (id, data) => {
+    set({ loading: true });
+
+    try {
+      const response = await apiClient.patch<
+        ApiSuccesResponse<{ product: ProductResponse }>
+      >(`/products/${id}`, data);
+      const adaptedProduct = createAdaptedProduct(response.data.data.product);
+      set((state) => ({
+        products: {
+          ...state.products,
+          data: state.products.data.map((product) =>
+            product.id === adaptedProduct.id
+              ? { ...product, ...adaptedProduct }
+              : product
+          ),
+        },
+        loading: false,
+      }));
+    } catch (error) {
+      const err = error as ApiErrorResponse;
+      set({
+        loading: false,
+      });
+      throw new Error(err.message);
+    }
   },
 }));

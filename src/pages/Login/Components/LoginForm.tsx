@@ -2,6 +2,8 @@ import { Button, Input } from "@/components";
 import FloatLabel from "@/components/float-label";
 import { useAuthStore } from "@/store";
 import { SubmitHandler, useForm } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 type Inputs = {
   email: string;
@@ -14,11 +16,22 @@ export default function LoginForm() {
     formState: { errors },
   } = useForm<Inputs>();
   const authStore = useAuthStore();
+  const navigate = useNavigate();
 
   const onSubmit: SubmitHandler<Inputs> = (data) => handleLogin(data);
 
   const handleLogin = async (data: Inputs) => {
-    await authStore.signIn(data.email, data.password);
+    try {
+      await authStore.signIn(data.email, data.password);
+      toast.success("Bienvenido ;)", {
+        richColors: false,
+        closeButton: true,
+        description: "Ingresando...",
+      });
+      navigate("/inventory");
+    } catch (error: any) {
+      toast.error(error.message);
+    }
   };
 
   return (

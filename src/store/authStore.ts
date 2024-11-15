@@ -6,7 +6,6 @@ import {
   Auth,
   AuthResponse,
 } from "@/models";
-import { toast } from "sonner";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
@@ -43,17 +42,12 @@ export const useAuthStore = create<AuthState & Action>()(
             authUser: adaptedAuthUser,
             loading: false,
           });
-          toast.success("Bienvenido ;)", {
-            richColors: false,
-            closeButton: true,
-            description: "Ingresando...",
-          });
         } catch (error) {
           const err = error as ApiErrorResponse;
           set({
             loading: false,
           });
-          toast.error(err.message);
+          throw new Error(err.message);
         }
       },
     }),

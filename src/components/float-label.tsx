@@ -13,11 +13,12 @@ interface FloatLabelInterface {
 const FloatLabel: React.FC<FloatLabelInterface> = (props) => {
   const [isFocused, setIsFocused] = useState(false);
   const [inputValue, setInputValue] = useState<string | number | undefined>(
-    props.value ?? props.children.props.value
+    props.children.props.value
   );
   useEffect(() => {
     const newValue = props.value ?? props.children.props.value;
     setInputValue(newValue);
+    setIsFocused(!!(newValue && newValue.toString().trim().length !== 0));
   }, [props.value, props.children.props.value]);
 
   const handleFocus = () => setIsFocused(true);
