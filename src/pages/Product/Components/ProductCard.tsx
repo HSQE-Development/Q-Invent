@@ -19,6 +19,7 @@ import ProductForm from "./ProductForm";
 import { Button, Modal } from "@/components";
 import { toast } from "sonner";
 import { useProductStore } from "@/store/productStore";
+import AssignPeople from "./AssignPeople";
 
 function BulletSeparator() {
   return <p className="font-extrabold text-2xl">•</p>;
@@ -147,7 +148,7 @@ export default function ProductCard({ product }: ProductCardProps) {
           title={`Asignar ${product.name}`}
           description="Aqui podras asignar el producto del inventario a una persona ;)"
         >
-          <div>Asignar</div>
+          <AssignPeople product={product} />
         </SideSheet>
         <Modal
           open={isModalOpen}
