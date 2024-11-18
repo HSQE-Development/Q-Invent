@@ -11,6 +11,7 @@ import {
   MapPin,
   PackageSearch,
   Pencil,
+  TimerReset,
   UserRoundPlus,
 } from "lucide-react";
 import { useMemo, useState } from "react";
@@ -46,7 +47,7 @@ export default function ProductCard({ product }: ProductCardProps) {
     try {
       if (productId) {
         await productStore.updateProduct(productId, {
-          active: "I",
+          active: product.active === "I" ? "A" : "I",
         });
         toast.success("Inactivado correctamente");
       }
@@ -74,9 +75,9 @@ export default function ProductCard({ product }: ProductCardProps) {
         },
       },
       {
-        icon: <CircleX />,
-        label: "Inactivar",
-        className: "text-red-500",
+        icon: product.active === "I" ? <TimerReset /> : <CircleX />,
+        label: product.active === "I" ? "Activar" : "Inactivar",
+        className: product.active === "I" ? "text-green-400" : "text-red-500",
         action: () => {
           setPopoverShow(true);
           setProductId(product.id);
@@ -131,7 +132,9 @@ export default function ProductCard({ product }: ProductCardProps) {
               )}
             />
           )}
-          <h2 className="text-zinc-400 text-2xl">{product.totalQuantity}</h2>
+          <h2 className="text-zinc-400 text-2xl">
+            {product.totalQuantity} {product.quantityType}
+          </h2>
         </div>
         <DropMenu items={menuItems} className="mr-12">
           <span className="hover:bg-gray-100 rounded-full flex items-center justify-center p-2">
@@ -141,7 +144,7 @@ export default function ProductCard({ product }: ProductCardProps) {
         <SideSheet
           open={isOpen}
           openChange={close}
-          title="Asignar producto"
+          title={`Asignar ${product.name}`}
           description="Aqui podras asignar el producto del inventario a una persona ;)"
         >
           <div>Asignar</div>
@@ -157,17 +160,26 @@ export default function ProductCard({ product }: ProductCardProps) {
         <Modal
           open={popoverShow}
           openChange={handleHidePopover}
-          title="Inactivar producto"
-          desc="¿Estás seguro que deseas inactivar?"
+          title={
+            product.active === "I" ? "Activar producto" : "Inactivar producto"
+          }
+          desc={`¿Estás seguro que deseas ${
+            product.active === "I" ? "activar" : "inactivar"
+          } ?`}
         >
           <>
             <form className="flex gap-4">
-              <Button onClick={handleInactivate} variant={"destructive"}>
+              <Button
+                onClick={handleInactivate}
+                variant={"destructive"}
+                type="button"
+              >
                 Confirmar
               </Button>
               <Button
                 onClick={() => setPopoverShow(false)} // Cerrar el Popover si se cancela
                 variant={"secondary"}
+                type="button"
               >
                 Cancelar
               </Button>

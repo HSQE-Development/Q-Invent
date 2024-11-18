@@ -91,11 +91,14 @@ export const useProductStore = create<AuthState & Actions>()((set, get) => ({
       );
 
       const adaptedProduct = createAdaptedProduct(productResponse.product);
-
-      get().products.data.push(adaptedProduct);
-      set({
+      set((state) => ({
+        products: {
+          ...state.products,
+          data: [...state.products.data, adaptedProduct],
+          total: state.products.total + 1,
+        },
         loading: false,
-      });
+      }));
       toast.success("Registro correcto.", {
         description: "Registraste un nuevo producto ;D",
       });
@@ -109,7 +112,7 @@ export const useProductStore = create<AuthState & Actions>()((set, get) => ({
   },
   countOfProducts: (state) => {
     let count = 0;
-    count = get().products.data.length || 0;
+    count = get().products.total || 0;
     if (state) {
       count =
         get().products.data.filter((product) => product.active === state)
@@ -131,7 +134,6 @@ export const useProductStore = create<AuthState & Actions>()((set, get) => ({
       });
       throw new Error(err.message);
     }
-    return null;
   },
   updateProduct: async (id, data) => {
     set({ loading: true });

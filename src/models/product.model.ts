@@ -8,6 +8,7 @@ export interface Product {
   name: string;
   totalQuantity: number;
   quantityType: string;
+  quantityAvailable: number;
   ubication: string;
   observation: string | null;
   active: ProductStatus;
@@ -18,6 +19,7 @@ export interface ProductResponse {
   name: string;
   total_quantity: number;
   quantity_type: string;
+  quantity_available: number;
   ubication: string;
   observation: string | null;
   active: string;
@@ -26,6 +28,7 @@ export interface ProductResponse {
 export interface ProductRequest {
   name: string;
   total_quantity: string;
+  quantity_type: string;
   ubication: string;
   observation: string | null;
   active: string | undefined;

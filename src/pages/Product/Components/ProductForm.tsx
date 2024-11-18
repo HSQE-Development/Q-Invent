@@ -55,6 +55,7 @@ function ProductForm({ className, id }: ProductFormProps) {
       if (product) {
         setValue("name", product.name);
         setValue("total_quantity", product.totalQuantity.toString());
+        setValue("quantity_type", product.quantityType);
         setValue("ubication", product.ubication);
         setValue("observation", product.observation);
         setValue("active", "A");
@@ -83,7 +84,7 @@ function ProductForm({ className, id }: ProductFormProps) {
           <span className="text-red-400">Esta fila es obligatoria</span>
         )}
       </div>
-      <div className="flex flex-col col-span-8">
+      <div className="flex flex-col col-span-4">
         <FloatLabel label="Cantidad" for="total_quantity" obligatory>
           <Input
             id="total_quantity"
@@ -99,6 +100,19 @@ function ProductForm({ className, id }: ProductFormProps) {
         </FloatLabel>
         {errors.total_quantity && (
           <span className="text-red-400">{errors.total_quantity.message}</span>
+        )}
+      </div>
+      <div className="flex flex-col col-span-4">
+        <FloatLabel label="Unidad" for="quantity_type" obligatory>
+          <Input
+            id="quantity_type"
+            {...register("quantity_type", {
+              required: "Esta fila es obligatoria",
+            })}
+          />
+        </FloatLabel>
+        {errors.quantity_type && (
+          <span className="text-red-400">{errors.quantity_type.message}</span>
         )}
       </div>
       <div className="flex flex-col col-span-8">

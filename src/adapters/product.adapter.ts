@@ -6,6 +6,7 @@ export const createAdaptedProduct = (product: ProductResponse): Product => {
     name: product.name,
     totalQuantity: product.total_quantity,
     quantityType: product.quantity_type,
+    quantityAvailable: product.quantity_available,
     ubication: product.ubication,
     observation: product.observation,
     active: product.active as ProductStatus,
