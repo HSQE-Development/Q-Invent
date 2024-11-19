@@ -3,6 +3,7 @@ import { apiClient } from "@/axios";
 import {
   ApiErrorResponse,
   ApiSuccesResponse,
+  AssignmentPeopleRequest,
   Pagination,
   Product,
   ProductRequest,
@@ -35,6 +36,10 @@ type Actions = {
   countOfProducts: (state?: string) => number;
   getProductById: (id: number) => Promise<Product | null>;
   updateProduct: (id: number, data: Partial<ProductRequest>) => Promise<void>;
+  assignment: (
+    productId: number,
+    data: AssignmentPeopleRequest
+  ) => Promise<void>;
 };
 
 export const useProductStore = create<AuthState & Actions>()((set, get) => ({
@@ -143,6 +148,34 @@ export const useProductStore = create<AuthState & Actions>()((set, get) => ({
         ApiSuccesResponse<{ product: ProductResponse }>
       >(`/products/${id}`, data);
       const adaptedProduct = createAdaptedProduct(response.data.data.product);
+      set((state) => ({
+        products: {
+          ...state.products,
+          data: state.products.data.map((product) =>
+            product.id === adaptedProduct.id
+              ? { ...product, ...adaptedProduct }
+              : product
+          ),
+        },
+        loading: false,
+      }));
+    } catch (error) {
+      const err = error as ApiErrorResponse;
+      set({
+        loading: false,
+      });
+      throw new Error(err.message);
+    }
+  },
+  assignment: async (productId, data) => {
+    set({ loading: true });
+    try {
+      const response = await apiClient.post<
+        ApiSuccesResponse<{ product: ProductResponse }>
+      >(`/products/${productId}/assignment`);
+
+      const adaptedProduct = createAdaptedProduct(response.data.data.product);
+
       set((state) => ({
         products: {
           ...state.products,

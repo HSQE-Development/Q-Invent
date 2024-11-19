@@ -9,6 +9,7 @@ import {
 import { useAssignmentPeopleStore } from "@/store/assignmentPeopleStore";
 import { useEffect } from "react";
 import QuantityCounter from "./QuantityCounter";
+import { Button } from "@/components";
 
 export default function OldPeopleForm() {
   const assignmentPeopleStore = useAssignmentPeopleStore();
@@ -16,21 +17,42 @@ export default function OldPeopleForm() {
   useEffect(() => {
     assignmentPeopleStore.getAllAssignmentPeople();
   }, []);
+
+  const handlePeopleChange = (id: number) => {
+    assignmentPeopleStore.setAssignment({
+      people_id: id,
+    });
+  };
+
+  const handleAssignment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log(assignmentPeopleStore.assignment);
+  };
+
   return (
-    <div className="w-full grid-cols-8 space-y-4">
-      <Select>
+    <form
+      className="w-full grid-cols-8 space-y-4 place-items-center"
+      onSubmit={handleAssignment}
+    >
+      <Select
+        name="poeple"
+        onValueChange={(e) => {
+          handlePeopleChange(parseInt(e));
+        }}
+      >
         <SelectTrigger className="col-span-8 !h-auto">
           <SelectValue placeholder="Selecciona una persona" />
         </SelectTrigger>
         <SelectContent className="w-full h-auto">
           {assignmentPeopleStore.assignmentPeoples.map((people) => (
-            <SelectItem value={people.name}>
+            <SelectItem value={people.id.toString()} key={people.id}>
               <PeopleCard people={people} />
             </SelectItem>
           ))}
         </SelectContent>
       </Select>
       <QuantityCounter className="col-span-8" />
-    </div>
+      <Button className="w-full">Asignar</Button>
+    </form>
   );
 }

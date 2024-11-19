@@ -12,3 +12,11 @@ export interface AssignmentPeopleResponse {
   phone: number;
   assigned_quantity: number | null;
 }
+
+export interface AssignmentPeopleRequest {
+  name: string | null;
+  email: string | null;
+  phone: string | null;
+  assigned_quantity: number;
+  people_id: number | null;
+}
