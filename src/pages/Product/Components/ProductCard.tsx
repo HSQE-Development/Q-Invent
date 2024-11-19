@@ -1,27 +1,23 @@
+import { Button, Modal } from "@/components";
 import DropMenu, { MenuItem } from "@/components/DropMenu/DropMenu";
 import { SideSheet } from "@/components/SideSheet";
-import { Badge } from "@/components/ui/badge";
 import { useModal } from "@/hooks";
-import { cn } from "@/lib";
 import { Product } from "@/models";
+import { useProductStore } from "@/store/productStore";
 import {
   CircleX,
   Ellipsis,
-  Info,
-  MapPin,
-  PackageSearch,
   Pencil,
   TimerReset,
   UserRoundPlus,
 } from "lucide-react";
 import { useMemo, useState } from "react";
-import ProductForm from "./ProductForm";
-import { Button, Modal } from "@/components";
 import { toast } from "sonner";
-import { useProductStore } from "@/store/productStore";
 import AssignPeople from "./AssignPeople";
+import ProductForm from "./ProductForm";
+import ProductInfo from "./ProductInfo";
 
-function BulletSeparator() {
+export function BulletSeparator() {
   return <p className="font-extrabold text-2xl">•</p>;
 }
 
@@ -89,52 +85,15 @@ export default function ProductCard({ product }: ProductCardProps) {
 
   return (
     <div className="p-4 bg-white border-2 rounded-2xl flex items-center justify-between hover:border-black hover:shadow-[4px_4px_0px_0px_rgba(0,0,0)] transition duration-200 group">
-      <div className="flex items-center gap-4">
-        <PackageSearch className="border h-12 w-12 p-2 rounded-lg " />
-        <div className="flex flex-col items-start justify-start">
-          <span className="flex items-center gap-2">
-            <h1 className="group-hover:underline">{product.name}</h1>
-            <BulletSeparator />
-            <Badge
-              className={cn(
-                product.active === "A" &&
-                  "bg-violet-300 border-2 border-violet-800 text-violet-900",
-                ""
-              )}
-            >
-              {product.active === "A" ? "Activo" : "Inactivo"}
-            </Badge>
-          </span>
-          <div className="flex items-center justify-start gap-2">
-            <span className="flex items-center gap-1">
-              <MapPin className="w-4 h-4" />
-              <p>{product.ubication}</p>
-            </span>
-            <BulletSeparator />
-            <span className="flex items-center gap-1">
-              <Info className="w-4 h-4" />
-              <p>{product.observation ?? "Sin Observación"}</p>
-            </span>
-          </div>
-        </div>
-      </div>
+      <ProductInfo product={product} />
       <div className="flex items-center gap-8">
-        <div className="flex items-center gap-2">
-          {product.totalQuantity && (
-            <div
-              className={cn(
-                "w-2 h-2 rounded-full",
-                product.totalQuantity == 0 && "bg-red-500",
-                product.totalQuantity <= 2 && "bg-red-500",
-                product.totalQuantity <= 6 &&
-                  product.totalQuantity > 2 &&
-                  "bg-orange-500",
-                product.totalQuantity > 6 && "bg-green-500"
-              )}
-            />
-          )}
-          <h2 className="text-zinc-400 text-2xl">
-            {product.totalQuantity} {product.quantityType}
+        <div className="flex items-center gap-2 border-2 px-2 rounded-xl">
+          Cantidad total
+          <h2 className="text-zinc-600 text-2xl">
+            <span className="bg-black text-white px-2 py-1 rounded-lg">
+              {product.totalQuantity}
+            </span>{" "}
+            {product.quantityType}
           </h2>
         </div>
         <DropMenu items={menuItems} className="mr-12">

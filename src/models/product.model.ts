@@ -1,3 +1,8 @@
+import {
+  AssignmentPeopleResponse,
+  AssignmentPeople,
+} from "./assignment-people.model";
+
 export enum ProductStatus {
   Active = "A",
   Inactive = "I",
@@ -12,6 +17,7 @@ export interface Product {
   ubication: string;
   observation: string | null;
   active: ProductStatus;
+  assignmentPeople: AssignmentPeople[];
 }
 
 export interface ProductResponse {
@@ -23,6 +29,7 @@ export interface ProductResponse {
   ubication: string;
   observation: string | null;
   active: string;
+  assignmentPeople: AssignmentPeopleResponse[];
 }
 
 export interface ProductRequest {

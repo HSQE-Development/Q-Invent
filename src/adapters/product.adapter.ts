@@ -1,4 +1,5 @@
 import { Product, ProductResponse, ProductStatus } from "@/models";
+import { createAdaptedAssignmentPeople } from "./assignment-people.adapter";
 
 export const createAdaptedProduct = (product: ProductResponse): Product => {
   const adaptedProduct: Product = {
@@ -10,6 +11,9 @@ export const createAdaptedProduct = (product: ProductResponse): Product => {
     ubication: product.ubication,
     observation: product.observation,
     active: product.active as ProductStatus,
+    assignmentPeople: product.assignmentPeople.map((people) =>
+      createAdaptedAssignmentPeople(people)
+    ),
   };
   return adaptedProduct;
 };

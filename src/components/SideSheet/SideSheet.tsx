@@ -17,7 +17,7 @@ interface SideSheetProps {
 export default function SideSheet(props: SideSheetProps) {
   return (
     <Sheet onOpenChange={props.openChange} open={props.open}>
-      <SheetContent>
+      <SheetContent className="md:!max-w-[30rem]">
         <SheetHeader>
           {props.title && <SheetTitle>{props.title}</SheetTitle>}
           {props.description && (
