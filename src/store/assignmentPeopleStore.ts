@@ -4,6 +4,7 @@ import {
   ApiErrorResponse,
   ApiSuccesResponse,
   AssignmentPeople,
+  AssignmentPeopleArrayRequest,
   AssignmentPeopleRequest,
   AssignmentPeopleResponse,
 } from "@/models";
@@ -14,20 +15,25 @@ type AssignmentPeopleState = {
   loading: boolean;
   filters?: Record<string, any>;
   assignment: AssignmentPeopleRequest | null;
+  assignments: AssignmentPeopleArrayRequest[];
 };
 
 type Actions = {
   getAllAssignmentPeople: () => Promise<void>;
   setAssignment: (data: Partial<AssignmentPeopleRequest>) => void;
+  resetAssignment: () => void;
+  setAssignments: (newAssignment: AssignmentPeopleArrayRequest) => void;
+  clearAssignments: () => void;
 };
 
 export const useAssignmentPeopleStore = create<
   AssignmentPeopleState & Actions
->()((set, get) => ({
+>()((set) => ({
   assignmentPeoples: [],
   loading: false,
   filters: {},
   assignment: null,
+  assignments: [],
   getAllAssignmentPeople: async () => {
     set({ loading: true });
 
@@ -51,6 +57,7 @@ export const useAssignmentPeopleStore = create<
     }
   },
   setAssignment: (data) => {
+    console.log("Updating assignment:", data);
     set((state) => ({
       assignment: {
         name: data.name ?? (state.assignment?.name || null),
@@ -61,5 +68,32 @@ export const useAssignmentPeopleStore = create<
         people_id: data.people_id ?? (state.assignment?.people_id || null),
       },
     }));
+  },
+  resetAssignment: () => {
+    set({
+      assignment: null,
+    });
+  },
+  setAssignments: (newAssignment) => {
+    set((state) => {
+      const existingIndex = state.assignments.findIndex(
+        (a) => a.people_id === newAssignment.people_id
+      );
+
+      if (existingIndex !== -1) {
+        // Si ya existe, actualizamos la cantidad asignada
+        const updatedAssignments = [...state.assignments];
+        updatedAssignments[existingIndex] = newAssignment;
+        return { assignments: updatedAssignments };
+      } else {
+        // Si no existe, lo añadimos
+        return { assignments: [...state.assignments, newAssignment] };
+      }
+    });
+  },
+  clearAssignments: () => {
+    set({
+      assignments: [],
+    });
   },
 }));

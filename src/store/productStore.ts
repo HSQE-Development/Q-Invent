@@ -3,6 +3,7 @@ import { apiClient } from "@/axios";
 import {
   ApiErrorResponse,
   ApiSuccesResponse,
+  AssignmentPeopleArrayRequest,
   AssignmentPeopleRequest,
   Pagination,
   Product,
@@ -16,6 +17,8 @@ type AuthState = {
   products: Pagination<Product[]>;
   product: Product | null;
   loading: boolean;
+  loadingAssignment: boolean;
+  loadingUnAssignment: boolean;
   filters?: Record<string, any>;
 };
 
@@ -33,20 +36,36 @@ export const DEFAULT_PAGINATION: Pagination<[]> = {
 type Actions = {
   getAllProducts: () => Promise<void>;
   createProduct: (data: ProductRequest) => Promise<void>;
-  countOfProducts: (state?: string) => number;
+  setFilters: (newFilters: Record<string, string | null>) => void;
+  countOfProducts: () => Promise<{
+    active: number;
+    inactive: number;
+    total: number;
+  }>;
   getProductById: (id: number) => Promise<Product | null>;
   updateProduct: (id: number, data: Partial<ProductRequest>) => Promise<void>;
   assignment: (
     productId: number,
     data: AssignmentPeopleRequest
   ) => Promise<void>;
+  bulkAssignment: (
+    productId: number,
+    data: AssignmentPeopleArrayRequest[]
+  ) => Promise<void>;
+  unAssignment: (productId: number, peopleId: number) => Promise<void>;
 };
 
 export const useProductStore = create<AuthState & Actions>()((set, get) => ({
   products: DEFAULT_PAGINATION,
   loading: false,
+  loadingAssignment: false,
+  loadingUnAssignment: false,
   product: null,
   filters: {},
+  setFilters: (newFilters: Record<string, string | null>) =>
+    set((state) => ({
+      filters: { ...state.filters, ...newFilters },
+    })),
   getAllProducts: async () => {
     set({ loading: true });
 
@@ -112,18 +131,20 @@ export const useProductStore = create<AuthState & Actions>()((set, get) => ({
       set({
         loading: false,
       });
-      throw new Error(err.message);
+      return Promise.reject(err.message);
     }
   },
-  countOfProducts: (state) => {
-    let count = 0;
-    count = get().products.total || 0;
-    if (state) {
-      count =
-        get().products.data.filter((product) => product.active === state)
-          .length || 0;
-    }
-    return count;
+  countOfProducts: async () => {
+    const response = await apiClient.get<
+      ApiSuccesResponse<{
+        counts: {
+          active: number;
+          inactive: number;
+          total: number;
+        };
+      }>
+    >(`/products/counts`);
+    return response.data.data.counts || 0;
   },
   getProductById: async (id) => {
     try {
@@ -137,7 +158,7 @@ export const useProductStore = create<AuthState & Actions>()((set, get) => ({
       set({
         loading: false,
       });
-      throw new Error(err.message);
+      return Promise.reject(err.message);
     }
   },
   updateProduct: async (id, data) => {
@@ -161,18 +182,19 @@ export const useProductStore = create<AuthState & Actions>()((set, get) => ({
       }));
     } catch (error) {
       const err = error as ApiErrorResponse;
-      set({
-        loading: false,
-      });
-      throw new Error(err.message);
+      set({ loading: false });
+      return Promise.reject(err.message);
     }
   },
   assignment: async (productId, data) => {
-    set({ loading: true });
+    set({ loadingAssignment: true });
     try {
       const response = await apiClient.post<
         ApiSuccesResponse<{ product: ProductResponse }>
-      >(`/products/${productId}/assignment`);
+      >(`/products/${productId}/assignment`, {
+        data_assignment: data,
+        is_update: false,
+      });
 
       const adaptedProduct = createAdaptedProduct(response.data.data.product);
 
@@ -185,14 +207,65 @@ export const useProductStore = create<AuthState & Actions>()((set, get) => ({
               : product
           ),
         },
-        loading: false,
+        loadingAssignment: false,
       }));
     } catch (error) {
       const err = error as ApiErrorResponse;
-      set({
-        loading: false,
+      set({ loadingAssignment: false });
+      return Promise.reject(err.data);
+    }
+  },
+  bulkAssignment: async (productId, data) => {
+    set({ loadingAssignment: true });
+    try {
+      const response = await apiClient.post<
+        ApiSuccesResponse<{ product: ProductResponse }>
+      >(`/products/${productId}/bulk/assignment`, {
+        data_assignment: data,
+        is_update: true,
       });
-      throw new Error(err.message);
+
+      const adaptedProduct = createAdaptedProduct(response.data.data.product);
+      set((state) => ({
+        products: {
+          ...state.products,
+          data: state.products.data.map((product) =>
+            product.id === adaptedProduct.id
+              ? { ...product, ...adaptedProduct }
+              : product
+          ),
+        },
+        loadingAssignment: false,
+      }));
+    } catch (error) {
+      const err = error as ApiErrorResponse;
+      set({ loadingAssignment: false });
+      return Promise.reject(err.data);
+    }
+  },
+  unAssignment: async (productId, peopleId) => {
+    set({ loadingUnAssignment: true });
+    try {
+      const response = await apiClient.post<
+        ApiSuccesResponse<{ product: ProductResponse }>
+      >(`/products/${productId}/unassignment/${peopleId}`);
+
+      const adaptedProduct = createAdaptedProduct(response.data.data.product);
+      set((state) => ({
+        products: {
+          ...state.products,
+          data: state.products.data.map((product) =>
+            product.id === adaptedProduct.id
+              ? { ...product, ...adaptedProduct }
+              : product
+          ),
+        },
+        loadingUnAssignment: false,
+      }));
+    } catch (error) {
+      const err = error as ApiErrorResponse;
+      set({ loadingUnAssignment: false });
+      return Promise.reject(err.data);
     }
   },
 }));

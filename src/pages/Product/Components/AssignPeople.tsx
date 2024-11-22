@@ -35,7 +35,10 @@ export default function AssignPeople({ product }: AssignPeopleProps) {
             value: "new",
             render: (
               <Suspense fallback={<FormSkeleton />}>
-                <NewPeopleForm />
+                <NewPeopleForm
+                  productId={product.id}
+                  productQuantityAvailable={product.quantityAvailable}
+                />
               </Suspense>
             ),
           },
@@ -43,7 +46,10 @@ export default function AssignPeople({ product }: AssignPeopleProps) {
             value: "old",
             render: (
               <Suspense fallback={<FormSkeleton />}>
-                <OldPeopleForm />
+                <OldPeopleForm
+                  productId={product.id}
+                  productQuantityAvailable={product.quantityAvailable}
+                />
               </Suspense>
             ),
           },

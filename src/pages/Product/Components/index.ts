@@ -4,4 +4,5 @@ export { default as SearchProduct } from "./SearchProduct";
 export { default as NewPeopleForm } from "./NewPeopleForm";
 export { default as OldPeopleForm } from "./OldPeopleForm";
 export { default as QuantityCounter } from "./QuantityCounter";
+export { default as ViewAssignPeople } from "./ViewAssignPeople";
 export * from "./Filters";

@@ -1,6 +1,10 @@
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import {
+  createBrowserRouter,
+  Navigate,
+  RouterProvider,
+} from "react-router-dom";
 import { ProtectedRoutes } from "./lib";
-import { Home, Login, ProductPage } from "./pages";
+import { Login, ProductPage } from "./pages";
 import { ThemeProvider } from "./components";
 import { Toaster } from "@/components/ui/sonner";
 import Layout from "./components/layout/Layout";
@@ -20,7 +24,7 @@ function App() {
             children: [
               {
                 path: "",
-                element: <Home />,
+                element: <Navigate to={"/inventory"} />,
               },
               {
                 path: "inventory",

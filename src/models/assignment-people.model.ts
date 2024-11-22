@@ -20,3 +20,8 @@ export interface AssignmentPeopleRequest {
   assigned_quantity: number;
   people_id: number | null;
 }
+
+export interface AssignmentPeopleArrayRequest {
+  people_id: number;
+  assigned_quantity: number;
+}

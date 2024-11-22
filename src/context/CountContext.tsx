@@ -1,5 +1,5 @@
 import { useProductStore } from "@/store/productStore";
-import React, { createContext, useContext, useMemo } from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
 
 interface CountContextProps {
   allCount: number;
@@ -13,18 +13,20 @@ export const CounProductsProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const productStore = useProductStore();
+  const [allCount, setAllCount] = useState<number>(0);
+  const [activeCount, setActiveCount] = useState<number>(0);
+  const [inactiveCount, setInactiveCount] = useState<number>(0);
 
-  const allCount = useMemo(() => {
-    return productStore.countOfProducts();
-  }, [productStore.products]);
+  useEffect(() => {
+    const fetchCounts = async () => {
+      const count = await productStore.countOfProducts();
+      setAllCount(count.total);
+      setActiveCount(count.active);
+      setInactiveCount(count.inactive);
+    };
 
-  const activeCount = useMemo(() => {
-    return productStore.countOfProducts("A");
-  }, [productStore.products]);
-
-  const inactiveCount = useMemo(() => {
-    return productStore.countOfProducts("I");
-  }, [productStore.products]);
+    fetchCounts();
+  }, []);
 
   return (
     <CountContext.Provider

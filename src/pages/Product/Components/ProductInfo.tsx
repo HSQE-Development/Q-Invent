@@ -27,6 +27,11 @@ export default function ProductInfo({ product }: ProductInfoProps) {
           >
             {product.active === "A" ? "Activo" : "Inactivo"}
           </Badge>
+          <BulletSeparator />
+          <div className="flex flex-row-reverse items-center justify-start gap-2">
+            <Badge>{product.totalQuantity}</Badge>
+            <small>Cantidad total</small>
+          </div>
         </span>
         <div className="flex items-center justify-start gap-2">
           <span className="flex items-center gap-1">

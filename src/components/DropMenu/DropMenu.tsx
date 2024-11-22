@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib";
 import { Separator } from "../ui/separator";
+import React from "react";
 
 export interface MenuItem {
   label: string;
@@ -34,17 +35,16 @@ export default function DropMenu(props: DropMenuProps) {
           <DropdownMenuLabel>{props.label ?? "Acciones"}</DropdownMenuLabel>
           <DropdownMenuSeparator />
           {props.items.map((menu, i) => (
-            <>
+            <React.Fragment key={i}>
               <DropdownMenuItem
                 onClick={menu.action}
-                key={i}
                 className={cn("flex items-center gap-2", menu.className)}
               >
                 {menu.icon}
                 {menu.label}
               </DropdownMenuItem>
               {menu.separator && <Separator orientation="horizontal" />}
-            </>
+            </React.Fragment>
           ))}
         </DropdownMenuContent>
       </DropdownMenu>

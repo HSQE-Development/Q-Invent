@@ -13,7 +13,7 @@ export default function QuantityCounter({ className }: QuantityCounterProps) {
   return (
     <div
       className={cn(
-        "w-full h-full flex flex-col items-center justify-center",
+        "w-full h-ful  flex flex-col items-center justify-center",
         className
       )}
     >
@@ -22,6 +22,9 @@ export default function QuantityCounter({ className }: QuantityCounterProps) {
           variant={"outline"}
           className="rounded-full w-1"
           type="button"
+          disabled={
+            (assignmentPeopleStore.assignment?.assigned_quantity || 0) === 0
+          }
           onClick={() => {
             assignmentPeopleStore.setAssignment({
               assigned_quantity: Math.max(
@@ -35,15 +38,13 @@ export default function QuantityCounter({ className }: QuantityCounterProps) {
         </Button>
         <div className="flex-1 text-cente !text-7xl">
           <Input
-            value={assignmentPeopleStore.assignment?.assigned_quantity}
-            className="w-40 h-40 border-0 text-center !text-7xl"
+            value={assignmentPeopleStore.assignment?.assigned_quantity || 0}
+            className="w-40 h-full border-0 text-center !text-7xl"
             onChange={(e) => {
               const value = e.target.value;
               if (value === "") {
-                // Si el campo está vacío, establece el valor como 0
                 assignmentPeopleStore.setAssignment({ assigned_quantity: 0 });
               } else if (/^\d+$/.test(value)) {
-                // Si el valor es un número válido, actualiza el estado
                 assignmentPeopleStore.setAssignment({
                   assigned_quantity: parseInt(value, 10),
                 });

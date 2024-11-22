@@ -5,6 +5,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { cn } from "@/lib";
 
 interface ModalProps {
   title: string;
@@ -12,12 +13,13 @@ interface ModalProps {
   open: boolean;
   openChange: () => void;
   children: React.ReactNode;
+  className?: string;
 }
 
 export default function Modal(props: ModalProps) {
   return (
     <Dialog open={props.open} onOpenChange={props.openChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className={cn("sm:w-[425px]", props.className)}>
         <DialogHeader>
           <DialogTitle>{props.title}</DialogTitle>
           {props.desc && <DialogDescription>{props.desc}</DialogDescription>}

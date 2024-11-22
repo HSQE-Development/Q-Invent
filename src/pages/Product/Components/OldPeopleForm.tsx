@@ -10,11 +10,21 @@ import { useAssignmentPeopleStore } from "@/store/assignmentPeopleStore";
 import { useEffect } from "react";
 import QuantityCounter from "./QuantityCounter";
 import { Button } from "@/components";
+import { useProductStore } from "@/store/productStore";
+import { toast } from "sonner";
 
-export default function OldPeopleForm() {
+export default function OldPeopleForm({
+  productId,
+  productQuantityAvailable,
+}: {
+  productId: number;
+  productQuantityAvailable: number;
+}) {
   const assignmentPeopleStore = useAssignmentPeopleStore();
+  const productStore = useProductStore();
 
   useEffect(() => {
+    assignmentPeopleStore.resetAssignment();
     assignmentPeopleStore.getAllAssignmentPeople();
   }, []);
 
@@ -26,7 +36,17 @@ export default function OldPeopleForm() {
 
   const handleAssignment = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log(assignmentPeopleStore.assignment);
+    try {
+      if (assignmentPeopleStore.assignment) {
+        await productStore.assignment(
+          productId,
+          assignmentPeopleStore.assignment
+        );
+        toast.success("Cantidad Asignada correctamente", { closeButton: true });
+      }
+    } catch (error: any) {
+      toast.error(error.data, { closeButton: true });
+    }
   };
 
   return (
@@ -52,7 +72,22 @@ export default function OldPeopleForm() {
         </SelectContent>
       </Select>
       <QuantityCounter className="col-span-8" />
-      <Button className="w-full">Asignar</Button>
+      {(assignmentPeopleStore.assignment?.assigned_quantity || 0) >
+        productQuantityAvailable && (
+        <small className="text-red-500">
+          La cantidad a asignar supera a la cantidad disponible del producto
+        </small>
+      )}
+      <Button
+        className="w-full"
+        loading={productStore.loadingAssignment}
+        disabled={
+          (assignmentPeopleStore.assignment?.assigned_quantity || 0) >
+          productQuantityAvailable
+        }
+      >
+        Asignar
+      </Button>
     </form>
   );
 }

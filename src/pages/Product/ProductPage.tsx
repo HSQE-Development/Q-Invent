@@ -27,7 +27,7 @@ export default function ProductPage() {
 
   useEffect(() => {
     productStore.getAllProducts();
-  }, []);
+  }, [productStore.filters]);
 
   const { open, close, isOpen } = useModal();
 
@@ -46,7 +46,6 @@ export default function ProductPage() {
             </Badge>
           </div>
           <div className="my-8 flex flex-col gap-8 px-4">
-            <ProductStatusFilter />
             <ProductStatusFilter />
           </div>
         </div>
