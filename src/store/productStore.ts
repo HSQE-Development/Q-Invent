@@ -36,7 +36,7 @@ export const DEFAULT_PAGINATION: Pagination<[]> = {
 type Actions = {
   getAllProducts: () => Promise<void>;
   createProduct: (data: ProductRequest) => Promise<void>;
-  setFilters: (newFilters: Record<string, string | null>) => void;
+  setFilters: (newFilters: Record<string, string | number | null>) => void;
   countOfProducts: () => Promise<{
     active: number;
     inactive: number;
@@ -62,7 +62,7 @@ export const useProductStore = create<AuthState & Actions>()((set, get) => ({
   loadingUnAssignment: false,
   product: null,
   filters: {},
-  setFilters: (newFilters: Record<string, string | null>) =>
+  setFilters: (newFilters: Record<string, string | number | null>) =>
     set((state) => ({
       filters: { ...state.filters, ...newFilters },
     })),

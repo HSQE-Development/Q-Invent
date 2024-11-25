@@ -19,6 +19,7 @@ import {
 import { useModal } from "@/hooks";
 import ProductStatusFilter from "./Components/Filters/ProductStatusFilter";
 import { useCountContext } from "@/context/CountContext";
+import { cn } from "@/lib";
 
 const ProductForm = lazy(() => import("./Components/ProductForm"));
 
@@ -87,7 +88,21 @@ export default function ProductPage() {
           <Pagination>
             <PaginationContent>
               <PaginationItem>
-                <PaginationPrevious href="#" />
+                <PaginationPrevious
+                  onClick={() => {
+                    if (productStore.products.current_page > 1) {
+                      productStore.setFilters({
+                        page: (
+                          productStore.products.current_page - 1
+                        ).toString(),
+                      });
+                    }
+                  }}
+                  className={cn(
+                    !productStore.products.previous_page_url &&
+                      "pointer-events-none text-zinc-400"
+                  )}
+                />
               </PaginationItem>
               {Array.from(
                 { length: productStore.products.last_page },
@@ -95,7 +110,9 @@ export default function ProductPage() {
               ).map((page) => (
                 <PaginationItem key={page}>
                   <PaginationLink
-                    href="#"
+                    onClick={() => {
+                      productStore.setFilters({ page });
+                    }}
                     // onClick={() => fetchPage(page)}
                     isActive={page === productStore.products.current_page}
                   >
@@ -110,8 +127,24 @@ export default function ProductPage() {
               )}
               <PaginationItem>
                 <PaginationNext
-                  href={productStore.products.next_page_url || ""}
+                  //href={productStore.products.next_page_url || ""}
+                  onClick={() => {
+                    if (
+                      productStore.products.current_page <
+                      productStore.products.last_page
+                    ) {
+                      productStore.setFilters({
+                        page: (
+                          productStore.products.current_page + 1
+                        ).toString(),
+                      });
+                    }
+                  }}
                   // ={!productStore.products.next_page_url}
+                  className={cn(
+                    !productStore.products.next_page_url &&
+                      "pointer-events-none text-zinc-400"
+                  )}
                 />
               </PaginationItem>
             </PaginationContent>
