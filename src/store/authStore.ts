@@ -16,6 +16,7 @@ type AuthState = {
 
 type Action = {
   signIn: (email: string, password: string) => Promise<void>;
+  logout: () => Promise<void>;
 };
 
 export const useAuthStore = create<AuthState & Action>()(
@@ -47,7 +48,24 @@ export const useAuthStore = create<AuthState & Action>()(
           set({
             loading: false,
           });
-          throw new Error(err.message);
+          return Promise.reject(err.message);
+        }
+      },
+      logout: async () => {
+        set({ loading: true });
+        try {
+          await apiClient.post<ApiSuccesResponse<any>>("/auth/logout");
+
+          set({
+            authUser: null,
+            loading: false,
+          });
+        } catch (error) {
+          const err = error as ApiErrorResponse;
+          set({
+            loading: false,
+          });
+          return Promise.reject(err.message);
         }
       },
     }),
