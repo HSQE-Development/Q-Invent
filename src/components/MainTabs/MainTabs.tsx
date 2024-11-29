@@ -1,11 +1,11 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib";
 
-interface TabListProps {
-  value: string;
-  label: string;
-  className?: string;
-}
+// interface TabListProps {
+//   value: string;
+//   label: string;
+//   className?: string;
+// }
 interface TabContent<T extends string> {
   value: T;
   render: React.ReactNode;
