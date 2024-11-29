@@ -7,6 +7,7 @@ import { useProductStore } from "@/store/productStore";
 import {
   CircleX,
   Ellipsis,
+  History,
   Pencil,
   TimerReset,
   UserRound,
@@ -18,6 +19,8 @@ import AssignPeople from "./AssignPeople";
 import ProductForm from "./ProductForm";
 import ProductInfo from "./ProductInfo";
 import ViewAssignPeople from "./ViewAssignPeople";
+import { useAuthStore } from "@/store";
+import { useNavigate } from "react-router-dom";
 
 export function BulletSeparator() {
   return <p className="font-extrabold text-2xl">•</p>;
@@ -43,6 +46,8 @@ export default function ProductCard({ product }: ProductCardProps) {
   const [productId, setProductId] = useState<number | null>(null);
   const [popoverShow, setPopoverShow] = useState(false);
 
+  const { authUser } = useAuthStore();
+
   const handleHidePopover = () => {
     setPopoverShow(false);
   };
@@ -59,9 +64,15 @@ export default function ProductCard({ product }: ProductCardProps) {
       toast.error(error.message);
     }
   };
+  const navigate = useNavigate();
 
   const menuItems = useMemo<MenuItem[]>(() => {
     return [
+      {
+        icon: <History />,
+        label: "Ver Historial",
+        action: () => navigate(`/inventory/product/${product.id}/history`),
+      },
       {
         icon: <UserRound />,
         label: "Ver Asignaciones",
@@ -70,14 +81,14 @@ export default function ProductCard({ product }: ProductCardProps) {
       {
         icon: <UserRoundPlus />,
         label: "Asignar",
-        separator: true,
+        separator: !authUser?.user.isSuperUser ? false : true,
         className: "text-violet-400 my-2",
         action: open,
       },
       {
         icon: <Pencil />,
         label: "Editar",
-        className: "text-orange-500",
+        className: `text-orange-500 ${!authUser?.user.isSuperUser && "hidden"}`,
         action: () => {
           openModal();
           setProductId(product.id);
@@ -86,7 +97,9 @@ export default function ProductCard({ product }: ProductCardProps) {
       {
         icon: product.active === "I" ? <TimerReset /> : <CircleX />,
         label: product.active === "I" ? "Activar" : "Inactivar",
-        className: product.active === "I" ? "text-green-400" : "text-red-500",
+        className: `${
+          product.active === "I" ? "text-green-400" : "text-red-500"
+        }  ${!authUser?.user.isSuperUser && "hidden"}`,
         action: () => {
           setPopoverShow(true);
           setProductId(product.id);
@@ -100,7 +113,18 @@ export default function ProductCard({ product }: ProductCardProps) {
       <div className="p-4 bg-white border-2 rounded-2xl flex items-center justify-between hover:border-black hover:shadow-[4px_4px_0px_0px_rgba(0,0,0)] transition-all ease-out duration-200 group">
         <ProductInfo product={product} />
         <div className="flex items-center gap-8">
-          <div className="opacity-0 group-hover:opacity-100 flex items-center justify-around w-24">
+          <div className="opacity-0 group-hover:opacity-100 flex items-center justify-around w-36">
+            <Button
+              variant={"outline"}
+              className="w-10 h-10  hover:bg-zinc-100 active:bg-zinc-200 rounded-full p-3 text-zinc-800 text-center"
+              title="Ver Historial"
+              aria-label="Open Product History"
+              onClick={() =>
+                navigate(`/inventory/product/${product.id}/history`)
+              }
+            >
+              <History />
+            </Button>
             <Button
               variant={"outline"}
               className="w-10 h-10  hover:bg-zinc-100 active:bg-zinc-200 rounded-full p-3 text-zinc-800 text-center"

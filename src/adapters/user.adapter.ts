@@ -8,6 +8,7 @@ export const createAdaptedUser = (user: UserResponse): User => {
     email: user.email,
     activo: user.activo,
     emailVerifiedAt: user.email_verified_at,
+    isSuperUser: user.is_superuser,
   };
 
   return adaptedUser;

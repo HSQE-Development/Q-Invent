@@ -4,3 +4,4 @@ export * from "./auth.model";
 export * from "./product.model";
 export * from "./user.model";
 export * from "./assignment-people.model";
+export * from "./ubication.model";

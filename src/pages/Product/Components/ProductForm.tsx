@@ -56,7 +56,7 @@ function ProductForm({ className, id }: ProductFormProps) {
         setValue("name", product.name);
         setValue("total_quantity", product.totalQuantity.toString());
         setValue("quantity_type", product.quantityType);
-        setValue("ubication", product.ubication);
+        setValue("ubication", product.ubication.id);
         setValue("observation", product.observation);
         setValue("active", "A");
       }

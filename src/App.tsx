@@ -4,7 +4,7 @@ import {
   RouterProvider,
 } from "react-router-dom";
 import { ProtectedRoutes } from "./lib";
-import { Login, ProductPage } from "./pages";
+import { Login, ProductHistoryPage, ProductPage } from "./pages";
 import { ThemeProvider } from "./components";
 import { Toaster } from "@/components/ui/sonner";
 import Layout from "./components/layout/Layout";
@@ -29,6 +29,10 @@ function App() {
               {
                 path: "inventory",
                 element: <ProductPage />,
+              },
+              {
+                path: "inventory/product/:productId/history",
+                element: <ProductHistoryPage />,
               },
             ],
           },

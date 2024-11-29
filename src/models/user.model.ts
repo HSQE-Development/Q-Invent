@@ -5,6 +5,7 @@ export interface UserResponse {
   email: string;
   activo: boolean;
   email_verified_at: string;
+  is_superuser: boolean;
 }
 
 export interface User {
@@ -14,4 +15,5 @@ export interface User {
   email: string;
   activo: boolean;
   emailVerifiedAt: string;
+  isSuperUser: boolean;
 }

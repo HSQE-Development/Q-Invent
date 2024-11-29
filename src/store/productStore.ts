@@ -19,6 +19,7 @@ type AuthState = {
   loading: boolean;
   loadingAssignment: boolean;
   loadingUnAssignment: boolean;
+  loadingMassiveImport: boolean;
   filters?: Record<string, any>;
 };
 
@@ -52,7 +53,12 @@ type Actions = {
     productId: number,
     data: AssignmentPeopleArrayRequest[]
   ) => Promise<void>;
-  unAssignment: (productId: number, peopleId: number) => Promise<void>;
+  unAssignment: (
+    productId: number,
+    peopleId: number,
+    observation: string
+  ) => Promise<void>;
+  importProducts: (base64: string) => Promise<void>;
 };
 
 export const useProductStore = create<AuthState & Actions>()((set, get) => ({
@@ -60,6 +66,7 @@ export const useProductStore = create<AuthState & Actions>()((set, get) => ({
   loading: false,
   loadingAssignment: false,
   loadingUnAssignment: false,
+  loadingMassiveImport: false,
   product: null,
   filters: {},
   setFilters: (newFilters: Record<string, string | number | null>) =>
@@ -147,11 +154,17 @@ export const useProductStore = create<AuthState & Actions>()((set, get) => ({
     return response.data.data.counts || 0;
   },
   getProductById: async (id) => {
+    set({
+      loading: true,
+    });
     try {
       const response = await apiClient.get<
         ApiSuccesResponse<{ product: ProductResponse }>
       >(`/products/${id}`);
       const adaptedProduct = createAdaptedProduct(response.data.data.product);
+      set({
+        loading: false,
+      });
       return adaptedProduct;
     } catch (error) {
       const err = error as ApiErrorResponse;
@@ -243,12 +256,12 @@ export const useProductStore = create<AuthState & Actions>()((set, get) => ({
       return Promise.reject(err.data);
     }
   },
-  unAssignment: async (productId, peopleId) => {
+  unAssignment: async (productId, peopleId, observation) => {
     set({ loadingUnAssignment: true });
     try {
       const response = await apiClient.post<
         ApiSuccesResponse<{ product: ProductResponse }>
-      >(`/products/${productId}/unassignment/${peopleId}`);
+      >(`/products/${productId}/unassignment/${peopleId}`, { observation });
 
       const adaptedProduct = createAdaptedProduct(response.data.data.product);
       set((state) => ({
@@ -262,6 +275,28 @@ export const useProductStore = create<AuthState & Actions>()((set, get) => ({
         },
         loadingUnAssignment: false,
       }));
+    } catch (error) {
+      const err = error as ApiErrorResponse;
+      set({ loadingUnAssignment: false });
+      return Promise.reject(err.data);
+    }
+  },
+  importProducts: async (base64) => {
+    set({ loadingMassiveImport: true });
+    try {
+      // No asigno los products al array directamente ya que pueden ser bastantes, mejor se hace otra consulta a getProducts
+      await apiClient.post<ApiSuccesResponse<{ products: ProductResponse[] }>>(
+        `/products/import/excel`,
+        {
+          file_base64: base64,
+        }
+      );
+
+      await get().getAllProducts();
+
+      set({
+        loadingMassiveImport: false,
+      });
     } catch (error) {
       const err = error as ApiErrorResponse;
       set({ loadingUnAssignment: false });

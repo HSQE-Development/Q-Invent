@@ -11,12 +11,14 @@ import {
 import { Product } from "@/models";
 import ProductInfo from "./ProductInfo";
 import { PeopleCard } from "@/components/People";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Button, Input } from "@/components";
 import { Delete, Minus, Plus } from "lucide-react";
 import { useAssignmentPeopleStore } from "@/store/assignmentPeopleStore";
 import { useProductStore } from "@/store/productStore";
 import { toast } from "sonner";
+import MainPopover from "@/components/Popover/MainPopover";
+import { Textarea } from "@/components/ui/textarea";
 
 interface ViewAssignPeopleProps {
   product: Product;
@@ -27,6 +29,13 @@ export default function ViewAssignPeople({ product }: ViewAssignPeopleProps) {
     useAssignmentPeopleStore();
   const [hasChanges, setHasChanges] = useState(false);
   const productStore = useProductStore();
+  const [isFullest, setIsFullest] = useState(false);
+  const [observation, setObservation] = useState("");
+
+  const sumaAsignadaInicial = product.assignmentPeople.reduce(
+    (total, people) => total + (people.assignedQuantity || 0),
+    0
+  );
 
   const assignmentCount = useMemo(() => {
     return product.assignmentPeople.reduce(
@@ -40,10 +49,42 @@ export default function ViewAssignPeople({ product }: ViewAssignPeopleProps) {
     newQuantity: number | undefined
   ) => {
     if (newQuantity !== undefined && newQuantity >= 0) {
+      const currentQuantity =
+        assignments.find((a) => a.people_id === peopleId)?.assigned_quantity ||
+        product.assignmentPeople.find((p) => p.id === peopleId)
+          ?.assignedQuantity ||
+        0;
+
+      const nuevaSumaAsignada =
+        sumaAsignadaInicial - currentQuantity + (newQuantity || 0);
+
+      if (
+        newQuantity > currentQuantity &&
+        nuevaSumaAsignada > product.quantityAvailable
+      ) {
+        setIsFullest(true);
+      } else {
+        setIsFullest(false);
+      }
       setAssignments({ people_id: peopleId, assigned_quantity: newQuantity });
       setHasChanges(true); // Marcar cambios como pendientes
     }
   };
+
+  const checkForChanges = () => {
+    return product.assignmentPeople.some((people) => {
+      const originalQuantity = people.assignedQuantity || 0;
+      const currentQuantity =
+        assignments.find((a) => a.people_id === people.id)?.assigned_quantity ??
+        originalQuantity;
+      return originalQuantity !== currentQuantity;
+    });
+  };
+
+  useEffect(() => {
+    setHasChanges(checkForChanges());
+  }, [assignments, product.assignmentPeople]);
+
   const handleSaveChanges = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -57,7 +98,7 @@ export default function ViewAssignPeople({ product }: ViewAssignPeopleProps) {
 
   const handleUnAssignment = async (productId: number, peopleId: number) => {
     try {
-      await productStore.unAssignment(productId, peopleId);
+      await productStore.unAssignment(productId, peopleId, observation);
       toast.success("Cambios Guardados correctamente.");
     } catch (error: any) {
       toast.error(error.data, { closeButton: true });
@@ -69,6 +110,11 @@ export default function ViewAssignPeople({ product }: ViewAssignPeopleProps) {
       onSubmit={handleSaveChanges}
     >
       <ProductInfo product={product} />
+      {isFullest && (
+        <span className="text-red-400 mt-4">
+          Superas la cantidad disponible para habilitar
+        </span>
+      )}
       <Table>
         <TableCaption>
           Lista de personas que se les ha asignado este producto.
@@ -100,7 +146,7 @@ export default function ViewAssignPeople({ product }: ViewAssignPeopleProps) {
                       onClick={() =>
                         handleQuantityChange(
                           people.id,
-                          (currentQuantity || 0) - 1
+                          Math.max(0, currentQuantity - 1)
                         )
                       }
                     >
@@ -129,15 +175,33 @@ export default function ViewAssignPeople({ product }: ViewAssignPeopleProps) {
                   </div>
                 </TableCell>
                 <TableCell>
-                  <Button
-                    type="button"
-                    loading={productStore.loadingUnAssignment}
-                    onClick={() => {
-                      handleUnAssignment(product.id, people.id);
-                    }}
+                  <MainPopover
+                    content={
+                      <div className="flex flex-col gap-4">
+                        <Textarea
+                          id="observation"
+                          name="observation"
+                          placeholder="Observaciones"
+                          onChange={(e) => {
+                            setObservation(e.target.value);
+                          }}
+                        />
+                        <Button
+                          type="button"
+                          loading={productStore.loadingUnAssignment}
+                          onClick={() => {
+                            handleUnAssignment(product.id, people.id);
+                          }}
+                        >
+                          Devolución
+                        </Button>
+                      </div>
+                    }
                   >
-                    <Delete />
-                  </Button>
+                    <Button type="button" variant={"secondary"}>
+                      <Delete />
+                    </Button>
+                  </MainPopover>
                 </TableCell>
               </TableRow>
             );
@@ -150,8 +214,8 @@ export default function ViewAssignPeople({ product }: ViewAssignPeopleProps) {
           </TableRow>
         </TableFooter>
       </Table>
-      {hasChanges && (
-        <Button loading={productStore.loadingAssignment}>
+      {hasChanges && !isFullest && (
+        <Button loading={productStore.loadingAssignment} disabled={isFullest}>
           Guardar Cambios
         </Button>
       )}

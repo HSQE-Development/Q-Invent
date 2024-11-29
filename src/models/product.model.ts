@@ -2,6 +2,7 @@ import {
   AssignmentPeopleResponse,
   AssignmentPeople,
 } from "./assignment-people.model";
+import { Ubication, UbicationResponse } from "./ubication.model";
 
 export enum ProductStatus {
   Active = "A",
@@ -14,10 +15,11 @@ export interface Product {
   totalQuantity: number;
   quantityType: string;
   quantityAvailable: number;
-  ubication: string;
+  ubication: Ubication;
   observation: string | null;
   active: ProductStatus;
   assignmentPeople: AssignmentPeople[];
+  productHistories: ProductHistories[];
 }
 
 export interface ProductResponse {
@@ -26,17 +28,39 @@ export interface ProductResponse {
   total_quantity: number;
   quantity_type: string;
   quantity_available: number;
-  ubication: string;
+  ubication: UbicationResponse;
   observation: string | null;
   active: string;
   assignmentPeople: AssignmentPeopleResponse[];
+  productHistories: ProductHistoriesResponse[];
 }
 
 export interface ProductRequest {
   name: string;
   total_quantity: string;
   quantity_type: string;
-  ubication: string;
+  ubication: number;
   observation: string | null;
   active: string | undefined;
+}
+
+export interface ProductHistories {
+  id: number;
+  peopleName: string | null;
+  peoplePhone: string | null;
+  peopleEmail: string | null;
+  assignmentQuantity: number | null;
+  devolutionDate: string | null;
+  assignDate: string | null;
+  observation: string;
+}
+export interface ProductHistoriesResponse {
+  id: number;
+  people_name: string | null;
+  people_phone: string | null;
+  people_email: string | null;
+  assignment_quantity: number | null;
+  devolution_date: string | null;
+  assign_date: string | null;
+  observation: string;
 }

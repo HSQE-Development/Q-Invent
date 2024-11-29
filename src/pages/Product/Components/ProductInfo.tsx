@@ -36,7 +36,7 @@ export default function ProductInfo({ product }: ProductInfoProps) {
         <div className="flex items-center justify-start gap-2">
           <span className="flex items-center gap-1">
             <MapPin className="w-4 h-4" />
-            <p>{product.ubication}</p>
+            <p>{product.ubication.name}</p>
           </span>
           <BulletSeparator />
           <span className="flex items-center gap-1">
@@ -55,10 +55,9 @@ export default function ProductInfo({ product }: ProductInfoProps) {
             )}
           >
             <Layers className="w-4 h-4" />
+            <small>Cantidad disponible</small>
+            <BulletSeparator />
             <p>{product.quantityAvailable}</p>
-            <span className="text-nowrap opacity-0 group-[spanquantity]:hover:opacity-100 w-0 group-[spanquantity]:hover:w-auto">
-              Cantidad disponible
-            </span>
           </span>
         </div>
       </div>

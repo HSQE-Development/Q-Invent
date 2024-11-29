@@ -6,10 +6,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-interface DropdownProps{
-    
-}
-
 export default function Dropdown() {
   return (
     <Select>

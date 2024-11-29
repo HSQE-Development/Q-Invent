@@ -20,11 +20,15 @@ import { useModal } from "@/hooks";
 import ProductStatusFilter from "./Components/Filters/ProductStatusFilter";
 import { useCountContext } from "@/context/CountContext";
 import { cn } from "@/lib";
+import { useAuthStore } from "@/store";
+import MainTabs from "@/components/MainTabs/MainTabs";
+import ProudctUploadExcel from "./Components/ProudctUploadExcel";
 
 const ProductForm = lazy(() => import("./Components/ProductForm"));
 
 export default function ProductPage() {
   const productStore = useProductStore();
+  const { authUser } = useAuthStore();
 
   useEffect(() => {
     productStore.getAllProducts();
@@ -56,21 +60,48 @@ export default function ProductPage() {
           openChange={close}
           desc="Aqui podras añadir un nuevo producto a tu inventario :)"
         >
-          <Suspense fallback={<FormSkeleton />}>
-            <ProductForm className="my-2" />
-          </Suspense>
+          <MainTabs
+            defaultValue="register"
+            className="col-span-4"
+            tabsLists={[
+              {
+                label: "Cargue Excel",
+                value: "excel",
+              },
+              {
+                label: "Registrar Producto",
+                value: "register",
+              },
+            ]}
+            tabsContent={[
+              {
+                value: "register",
+                render: (
+                  <Suspense fallback={<FormSkeleton />}>
+                    <ProductForm className="my-2" />
+                  </Suspense>
+                ),
+              },
+              {
+                value: "excel",
+                render: <ProudctUploadExcel />,
+              },
+            ]}
+          />
         </Modal>
 
         <div className="col-span-9 flex flex-col relative h-auto overflow-auto scrolling__container px-2">
           <div className="flex items-center justify-between gap-2 sticky top-0 z-10 bg-white py-2">
             <SearchProduct />
             <Separator orientation="vertical" className="h-[70%] " />
-            <div className="flex items-center justify-evenly gap-2 h-full">
-              <Button variant={"secondary"}>
-                <Ellipsis />
-              </Button>
-              <Button onClick={open}>Agregar Producto</Button>
-            </div>
+            {authUser?.user.isSuperUser && (
+              <div className="flex items-center justify-evenly gap-2 h-full">
+                <Button variant={"secondary"}>
+                  <Ellipsis />
+                </Button>
+                <Button onClick={open}>Agregar Producto</Button>
+              </div>
+            )}
           </div>
           {productStore.loading &&
             Array.from({ length: 4 }).map((_, index) => (
@@ -85,7 +116,7 @@ export default function ProductPage() {
           {!productStore.loading && (
             <ListProducts products={productStore.products} />
           )}
-          <Pagination>
+          <Pagination className="mb-12">
             <PaginationContent>
               <PaginationItem>
                 <PaginationPrevious
