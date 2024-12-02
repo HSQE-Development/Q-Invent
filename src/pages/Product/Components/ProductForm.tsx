@@ -7,6 +7,8 @@ import { ProductRequest } from "@/models";
 import { useProductStore } from "@/store/productStore";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { useUbicationStore } from "@/store/ubicationStore";
+import ComboBox from "@/components/ComboBox/ComboBox";
 
 interface ProductFormProps {
   id?: number;
@@ -19,10 +21,12 @@ function ProductForm({ className, id }: ProductFormProps) {
     handleSubmit,
     reset,
     setValue,
+    getValues,
     formState: { errors },
   } = useForm<ProductRequest>();
 
   const productStore = useProductStore();
+  const { getAllUbications, ubications } = useUbicationStore();
   const onSubmit: SubmitHandler<ProductRequest> = (data) => {
     if (!id) {
       handleCreateProduct(data);
@@ -30,6 +34,7 @@ function ProductForm({ className, id }: ProductFormProps) {
       handleUpdateProduct(data);
     }
   };
+  const [ubicaciónId, setUbicationId] = useState(0);
 
   const handleUpdateProduct = async (data: Partial<ProductRequest>) => {
     try {
@@ -42,10 +47,23 @@ function ProductForm({ className, id }: ProductFormProps) {
     }
   };
 
+  const onChangeUbication = (value: string) => {
+    setUbicationId(parseInt(value));
+  };
+
   const handleCreateProduct = async (data: ProductRequest) => {
+    data.ubication = ubicaciónId;
     await productStore.createProduct(data);
   };
 
+  useEffect(() => {
+    setLoadData(true);
+    async function loadUbications() {
+      await getAllUbications();
+    }
+    setLoadData(false);
+    loadUbications();
+  }, []);
   useEffect(() => {
     async function loadProductData(productId: number) {
       setLoadData(true);
@@ -115,13 +133,17 @@ function ProductForm({ className, id }: ProductFormProps) {
           <span className="text-red-400">{errors.quantity_type.message}</span>
         )}
       </div>
-      <div className="flex flex-col col-span-8">
-        <FloatLabel label="Ubicación" for="ubication" obligatory>
-          <Input
-            id="ubication"
-            {...register("ubication", { required: true })}
-          />
-        </FloatLabel>
+      <div className="flex flex-col col-span-8 w-full">
+        <label htmlFor="">Ubicación</label>
+        <ComboBox
+          items={ubications.map((ubication) => ({
+            label: ubication.name,
+            value: ubication.id.toString(),
+          }))}
+          emptyLabel="Selecciona una ubicación..."
+          onChange={onChangeUbication}
+          defaultValue={getValues("ubication")?.toString()}
+        />
         {errors.ubication && (
           <span className="text-red-400">Esta fila es obligatoria</span>
         )}

@@ -158,23 +158,23 @@ export const useProductStore = create<AuthState & Actions>()((set, get) => ({
     return response.data.data.counts || 0;
   },
   getProductById: async (id) => {
-    set({
-      loading: true,
-    });
+    // set({
+    //   loading: true,
+    // });
     try {
       const response = await apiClient.get<
         ApiSuccesResponse<{ product: ProductResponse }>
       >(`/products/${id}`);
       const adaptedProduct = createAdaptedProduct(response.data.data.product);
-      set({
-        loading: false,
-      });
+      // set({
+      //   loading: false,
+      // });
       return adaptedProduct;
     } catch (error) {
       const err = error as ApiErrorResponse;
-      set({
-        loading: false,
-      });
+      // set({
+      //   loading: false,
+      // });
       return Promise.reject(err.message);
     }
   },
