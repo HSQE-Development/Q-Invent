@@ -1,4 +1,3 @@
-import { Ellipsis } from "lucide-react";
 import { Button, FormSkeleton, Modal } from "@/components";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
@@ -96,9 +95,6 @@ export default function ProductPage() {
             <Separator orientation="vertical" className="h-[70%] " />
             {authUser?.user.isSuperUser && (
               <div className="flex items-center justify-evenly gap-2 h-full">
-                <Button variant={"secondary"}>
-                  <Ellipsis />
-                </Button>
                 <Button onClick={open}>Agregar Producto</Button>
               </div>
             )}

@@ -20,6 +20,7 @@ type AuthState = {
   loadingAssignment: boolean;
   loadingUnAssignment: boolean;
   loadingMassiveImport: boolean;
+  loadingExport: boolean;
   filters?: Record<string, any>;
 };
 
@@ -59,6 +60,8 @@ type Actions = {
     observation: string
   ) => Promise<void>;
   importProducts: (base64: string) => Promise<void>;
+  allProducts: () => Promise<Product[]>;
+  exportInventoryData: () => Promise<void>;
 };
 
 export const useProductStore = create<AuthState & Actions>()((set, get) => ({
@@ -67,6 +70,7 @@ export const useProductStore = create<AuthState & Actions>()((set, get) => ({
   loadingAssignment: false,
   loadingUnAssignment: false,
   loadingMassiveImport: false,
+  loadingExport: false,
   product: null,
   filters: {},
   setFilters: (newFilters: Record<string, string | number | null>) =>
@@ -300,6 +304,48 @@ export const useProductStore = create<AuthState & Actions>()((set, get) => ({
     } catch (error) {
       const err = error as ApiErrorResponse;
       set({ loadingUnAssignment: false });
+      return Promise.reject(err.data);
+    }
+  },
+  allProducts: async () => {
+    try {
+      // No asigno los products al array directamente ya que pueden ser bastantes, mejor se hace otra consulta a getProducts
+      const response = await apiClient.get<
+        ApiSuccesResponse<{ products: ProductResponse[] }>
+      >(`/products/all`);
+
+      return response.data.data.products.map((product) =>
+        createAdaptedProduct(product)
+      );
+    } catch (error) {
+      const err = error as ApiErrorResponse;
+      return Promise.reject(err.data);
+    }
+  },
+  exportInventoryData: async () => {
+    set({
+      loadingExport: true,
+    });
+    try {
+      const response = await apiClient.post<
+        ApiSuccesResponse<{ file: string; file_name: string }>
+      >(`/products/inventory/export`);
+
+      const link = document.createElement("a");
+      link.href = `data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,${response.data.data.file}`;
+      link.download = response.data.data.file_name;
+      set({
+        loadingExport: false,
+      });
+
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      set({
+        loadingExport: false,
+      });
+      const err = error as ApiErrorResponse;
       return Promise.reject(err.data);
     }
   },
