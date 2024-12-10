@@ -43,6 +43,7 @@ export default function OldPeopleForm({
           assignmentPeopleStore.assignment
         );
         toast.success("Cantidad Asignada correctamente", { closeButton: true });
+        assignmentPeopleStore.resetAssignment();
       }
     } catch (error: any) {
       toast.error(error.data, { closeButton: true });
