@@ -53,9 +53,7 @@ export default function NewPeopleForm({
           />
         </div>
         <div className="col-span-2 flex flex-col">
-          <label htmlFor="phone">
-            Telefono <span className="text-red-500">*</span>
-          </label>
+          <label htmlFor="phone">Telefono</label>
           <Input
             id="phone"
             name="phone"
